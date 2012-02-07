@@ -11,11 +11,10 @@ var app = module.exports = express.createServer();
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  app.use(express.bodyParser());
+  app.use(express.bodyParser({uploadDir: __dirname + "/uploads"}));
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
-  app.use(express.bodyParser({uploadDir: __dirname + '/uploads'}));
 });
 
 app.configure('development', function(){
@@ -37,6 +36,7 @@ app.all('/snoop', function(req, res) {
         headers: req.headers,
         query: req.query,
         body: req.body,
+        files: req.files,
     };
     console.log(r);
     res.json(r, null, status);
@@ -90,16 +90,6 @@ app.all('/chunked', function(req, res) {
         });
         send_chunk(res, 10);
     }, 2 * 1000);
-});
-
-app.all("/upload", function(req, res, next) {
-    console.log("upload");
-    console.log(req.body);
-    console.log(req.files);
-    res.writeHead(200, {
-        "Content-Type": "text/plain",
-    });
-    res.end("OK");
 });
 
 app.listen(3000);

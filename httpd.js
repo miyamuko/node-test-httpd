@@ -70,20 +70,16 @@ app.all('/chunked', function(req, res) {
     console.log("chunked %s (n=%s, interval=%s)", status, n, interval);
     var send_chunk = function(res, n) {
         setTimeout(function() {
-            var chunk = "chunk data " + n;
-            if (n % 2 == 0) {
-                res.write("\n")
-                chunk = chunk + "\n";
-            }
+            var chunk = "chunk data " + n + "\n";
             if (n == 0) {
-                console.log("End chunk");
+                console.log("End chunk: %d", n);
                 res.end(chunk);
             } else {
                 console.log("Send chunk: %d", n);
                 res.write(chunk);
                 send_chunk(res, n - 1);
             }
-        }, (n % 3 == 0) ? interval : interval * 2);
+        }, interval);
     };
 
     setTimeout(function() {

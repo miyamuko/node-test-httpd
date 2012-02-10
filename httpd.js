@@ -64,14 +64,17 @@ app.all("/disconnect", function(req, res, next) {
 
 app.all('/chunked', function(req, res) {
     var status = req.param("status") || "200";
-    console.log("chunked %s", status);
+    var interval = parseInt(req.param("interval") || "500");
+    var n = parseInt(req.param("n") || "9");
+
+    console.log("chunked %s (n=%s, interval=%s)", status, n, interval);
     var send_chunk = function(res, n) {
         setTimeout(function() {
             var chunk = "chunk data " + n;
-            if (n % 2 == 0)
-                chunk += "\n";
-            if (n % 4 == 0)
-                chunk += chunk;
+            if (n % 2 == 0) {
+                res.write("\n")
+                chunk = chunk + "\n";
+            }
             if (n == 0) {
                 console.log("End chunk");
                 res.end(chunk);
@@ -80,7 +83,7 @@ app.all('/chunked', function(req, res) {
                 res.write(chunk);
                 send_chunk(res, n - 1);
             }
-        }, 2 * 1000);
+        }, (n % 3 == 0) ? interval : interval * 2);
     };
 
     setTimeout(function() {
@@ -88,8 +91,8 @@ app.all('/chunked', function(req, res) {
             'Content-Type': 'text/plain',
             'Transfer-Encoding': 'chunked',
         });
-        send_chunk(res, 10);
-    }, 2 * 1000);
+        send_chunk(res, n);
+    }, interval);
 });
 
 app.listen(3000);
